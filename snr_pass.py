@@ -44,8 +44,12 @@ class Target(object):
 	def attack_password(self):
 		good("Spraying wp-tables")
 		for x in range(0,len(ALPHABET)):
-			if x == len(ALPHABET)/2:
+			if x == len(ALPHABET)/4:
+				good("25% done")
+			elif x == len(ALPHABET)/2:
 				good("50% done")
+			elif x == len(ALPHABET)/4*3:
+				good("75% done")
 			self.replace(ALPHABET[x],'1')
 		good("Placing '"+self.password+"' as password")
 		for x in reversed(range(15,35)):
