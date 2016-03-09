@@ -1,7 +1,8 @@
 # searchpwndb2
 ## Description
 This tool uses the widely used migration script `searchreplacedb2.php` which webmasters often forget in their web root to gain control of a WordPress installation.
-
+## Warning!
+The use of this tool will completely destroy your `wp_users` table, changing every password for the one you selected and every other columns for absolute junk, except the username you gave. 
 ## Usage
 ```
 $ ./replace_admin.py --help
