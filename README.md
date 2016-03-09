@@ -1,6 +1,6 @@
 # searchpwndb2
-This tool uses the widely used migration script `searchreplacedb2.php` which webmasters often forget in their web root to gain control of a WordPress installation.
 ## Description
+This tool uses the widely used migration script `searchreplacedb2.php` which webmasters often forget in their web root to gain control of a WordPress installation.
 
 ## Usage
 ```
