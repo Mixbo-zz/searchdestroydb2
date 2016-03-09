@@ -1,7 +1,6 @@
 #!/usr/bin/env python2
 import urllib,urllib2
-import optparse
-import sys
+import optparse,sys
 import time
 import hashlib
 
@@ -37,6 +36,9 @@ class Target(object):
 		time.sleep(.050)
 
 	def attack_sequence(self):
+		info("Most user data (including current password and email) will be destroyed")
+		info("You have 10 seconds to cancel")
+		time.sleep(10)
 		self.keep_user()
 		self.attack_password()
 		self.place_user()
