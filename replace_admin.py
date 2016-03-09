@@ -113,7 +113,7 @@ def info(text):
 	print "[\x1B[33m!\x1B[0m] "+text
 
 def main():
-	parser = optparse.OptionParser("Usage: "+sys.argv[0]+" -t <target_url> [-u <user>] [-p <password>]")
+	parser = optparse.OptionParser("Usage: "+sys.argv[0]+" -t <target_url> [-u <user>] [-p <password>]\n\n~Mixbo (https://github.com/mixbo)")
 	parser.add_option('-t',dest='target_url',type='string',help="The target's URL (ex: http://www.exemple.com/searchreplacedb2.php)")
 	parser.add_option('-u',dest='target_user',type='string',help="The target's user you'll use")
 	parser.add_option('-p',dest='target_password',type='string',help="The new password")
