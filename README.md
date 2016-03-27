@@ -9,4 +9,4 @@ Usage: ./single_user.py <url>
 ```
 
 ## To Do
-- Using multiple filling characters instead of always using `*` to mitigate collisions
+- Using multiple filling characters instead of always using `$` to mitigate collisions
